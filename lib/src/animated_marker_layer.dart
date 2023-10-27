@@ -20,26 +20,21 @@ class AnimatedMarkerLayer<T> extends ImplicitlyAnimatedWidget {
   AnimatedWidgetBaseState createState() => _AnimatedMarkerLayerState();
 }
 
-class _AnimatedMarkerLayerState
-    extends AnimatedWidgetBaseState<AnimatedMarkerLayer>
+class _AnimatedMarkerLayerState extends AnimatedWidgetBaseState<AnimatedMarkerLayer>
     with AutomaticKeepAliveClientMixin {
   Tween<double>? _latitude;
   Tween<double>? _longitude;
 
   Marker get marker => widget.options.marker;
-  double get latitude =>
-      _latitude?.evaluate(animation) ?? marker.point.latitude;
-  double get longitude =>
-      _longitude?.evaluate(animation) ?? marker.point.longitude;
+  double get latitude => _latitude?.evaluate(animation) ?? marker.point.latitude;
+  double get longitude => _longitude?.evaluate(animation) ?? marker.point.longitude;
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
     _latitude = visitor(_latitude, widget.options.marker.point.latitude,
-            (dynamic value) => Tween<double>(begin: value as double))
-        as Tween<double>?;
+        (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
     _longitude = visitor(_longitude, widget.options.marker.point.longitude,
-            (dynamic value) => Tween<double>(begin: value as double))
-        as Tween<double>?;
+        (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
   }
 
   @override
@@ -51,10 +46,10 @@ class _AnimatedMarkerLayerState
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final map = FlutterMapState.maybeOf(context)!;
+    final map = FlutterMapState.of(context);
     final pxPoint = map.project(LatLng(latitude, longitude));
-    final width = marker.width - marker.anchor.left;
-    final height = marker.height - marker.anchor.top;
+    final width = marker.width - marker.anchorPos!.anchor!.left;
+    final height = marker.height - marker.anchorPos!.anchor!.top;
     var sw = CustomPoint(pxPoint.x + width, pxPoint.y - height);
     var ne = CustomPoint(pxPoint.x - width, pxPoint.y + height);
     if (!map.pixelBounds.containsPartialBounds(Bounds(sw, ne))) {
@@ -65,8 +60,8 @@ class _AnimatedMarkerLayerState
         // Counter rotated marker to the map rotation
         ? Transform.rotate(
             angle: -map.rotationRad,
-            origin: marker.rotateOrigin ?? widget.options.rotateOrigin,
-            alignment: marker.rotateAlignment ?? widget.options.rotateAlignment,
+            origin: widget.options.rotateOrigin,
+            alignment: widget.options.rotateAlignment,
             child: marker.builder(context),
           )
         : marker.builder(context);
